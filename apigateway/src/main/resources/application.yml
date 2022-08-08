@@ -1,0 +1,38 @@
+server:
+  port: 9093
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    name: apigateway
+  cloud:
+    gateway:
+      discovery.locator:
+        enabled: false
+        lowerCaseServiceId: true
+
+      routes:
+        - id: firstms
+          uri: http://localhost:9090
+          predicates:
+            - Path= /dummy-firstms/**
+          filters:
+            - RewritePath= /dummy-firstms/(?<path>.*), /$\{path}
+        - id: firstms-client
+          uri: lb://FIRSTMS-CLIENT
+          predicates:
+            - Path= /dummy/**
+          filters:
+            - RewritePath= /dummy/(?<path>.*), /$\{path}
